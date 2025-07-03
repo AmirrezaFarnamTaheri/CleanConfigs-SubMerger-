@@ -5,7 +5,11 @@ import re
 from pathlib import Path
 from typing import List, Optional
 
-# Standalone script: accepts its own proxy and timeout options.
+# These scripts also update ``vpn_merger.CONFIG.proxy`` when present.
+try:
+    from vpn_merger import CONFIG
+except Exception:  # pragma: no cover
+    CONFIG = None
 
 
 def parse_line(line: str) -> str:
@@ -136,6 +140,8 @@ def main() -> None:
         if src_file.exists():
             data = json.loads(src_file.read_text())
             sources = data.get('tunnel_bridge', [])
+    if CONFIG is not None:
+        CONFIG.proxy = args.proxy
     asyncio.run(main_async(sources, Path(args.output_dir), args.proxy, args.test_timeout))
 
 
